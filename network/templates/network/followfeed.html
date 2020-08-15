@@ -1,0 +1,67 @@
+{% extends "network/layout.html" %}
+
+{% block body %}
+
+  <h2 class="mx-auto w-75 m-3">Updates from people you follow</h2>
+  
+  <div id="allposts">
+    {% for post in allposts %}
+        <div class="card mx-auto w-75 m-3">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <a href="{% url 'userpage' post.author.pk %}">{{post.author.username}}</a>
+                    <span style="color: gray;"><small>({{post.timestamp|date:'d M g:i a'}})</small></span>
+                </h5>
+                <p class="card-text">{{ post.content }}</p>
+                {% if user.is_authenticated %}
+                {% if user in post.likers.all %}
+                    <a class="likelink" data-postid="{{post.pk}}" href="#a">unlike</a> |
+                {% else %} 
+                    <a class="likelink" data-postid="{{post.pk}}" href="#a">like</a> |
+                {% endif %}
+                {% endif %}
+                <span id="span{{post.pk}}">{{ post.likers.all | length }} </span> likes
+                {% if user.pk == post.author.pk %}
+                    | <a href="#b" class="editpost" id="edit{{post.id}}">Edit</a>
+                {% endif %}
+                <!-- <span><p>{{ post.likers.all | length }} likes</p><a href="#">like</a></span> -->
+            </div>
+        </div>
+    {% empty %}
+        <div class="mx-auto w-75 m-3">You are not following anyone.</div>
+    {% endfor %}
+  </div>
+
+
+
+  {% if allposts %}
+  <nav aria-label="Page navigation example">
+    <ul class="pagination justify-content-center">
+      {% if allposts.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ allposts.previous_page_number }}">Previous</a>
+        </li>
+      {% else %}
+        <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
+      {% endif %}
+      
+
+      {% for n in allposts.paginator.page_range %}
+        {% if allposts.number == n %}
+            <li class="page-item active"><a class="page-link" href="?page={{n}}">{{n}}</a></li>
+        {% else %}
+        <li class="page-item"><a class="page-link" href="?page={{n}}">{{n}}</a></li>
+        {% endif %}
+      {% endfor %}
+
+      {% if allposts.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ allposts.next_page_number }}">Next</a>
+        </li>
+      {% else %}
+        <li class="page-item disabled"><a class="page-link" href="#">Next</a></li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+{% endblock %}
